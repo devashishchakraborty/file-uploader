@@ -1,0 +1,17 @@
+/* Header */
+header{
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.mainLogo{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 2em;
+  text-decoration: none;
+  font-weight: bold;
+}

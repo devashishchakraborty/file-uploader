@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include("partials/head") %>
+  </head>
+  <body>
+      <%- include("partials/header") %>
+      <main class="container">
+        <%- include("partials/errors") %> 
+        <div class="formContainer">
+          <h1>Create new account</h1>
+          <form action="/sign-up" method="post">
+            <div>
+              <label for="name">Name: </label>
+              <input type="text" name="name" id="name" required />
+            </div>
+            <div>
+              <label for="email">Email: </label>
+              <input type="email" name="email" id="email" required />
+            </div>
+            <div>
+              <label for="password">Password: </label>
+              <input type="password" name="password" id="password" required />
+            </div>
+            <div>
+              <label for="confirmPassword">Confirm Password: </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                id="confirmPassword"
+                required
+              />
+            </div>
+            <button type="submit" class="submitBtn">Submit</button>
+          </form>
+        </div>
+      </main>
+  </body>
+</html>

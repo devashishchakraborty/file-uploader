@@ -14,14 +14,14 @@ datasource db {
 }
 
 model File {
-  id         Int      @id @default(autoincrement())
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  title      String
-  file_path  String   @unique
-  uploader    User   @relation(fields: [uploader_id], references: [id])
+  id          Int      @id @default(autoincrement())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  title       String
+  file_path   String   @unique
+  uploader    User     @relation(fields: [uploader_id], references: [id])
   uploader_id Int
-  folder      Folder @relation(fields: [folder_id], references: [id])
+  folder      Folder   @relation(fields: [folder_id], references: [id])
   folder_id   Int
 }
 
@@ -31,21 +31,17 @@ model Folder {
   updated_at  DateTime @updatedAt
   folder_name String
   files       File[]
-}
-
-model Profile {
-  id      Int     @id @default(autoincrement())
-  bio     String?
-  user    User    @relation(fields: [user_id], references: [id])
-  user_id Int     @unique
+  creator     User     @relation(fields: [creator_id], references: [id])
+  creator_id  Int
 }
 
 model User {
-  id      Int      @id @default(autoincrement())
-  email   String   @unique
-  name    String
-  files   File[]
-  profile Profile?
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  name     String
+  password String
+  files    File[]
+  folders  Folder[]
 }
 
 model Session {

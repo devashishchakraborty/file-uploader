@@ -3,6 +3,8 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import multer from "multer";
+import indexRouter from "./routes/indexRouter.js";
+import authRouter from "./routes/authRouter.js";
 
 // Get __dirname in ES6
 const __filename = fileURLToPath(import.meta.url);
@@ -21,10 +23,6 @@ app.use(express.static(path.join(__dirname, "public")));
 // app.use(sessionConfig);
 // app.use(passport.session());
 
-app.get("/", (req, res) => res.render("form"));
-app.post("/", upload.single('document'), (req, res) => {
-  console.log(req.file, req.body)
-  res.redirect("/");
-});
+app.use("/", indexRouter);
 
 app.listen(3000, () => console.log("app listening on port 3000!"));
