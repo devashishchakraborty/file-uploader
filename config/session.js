@@ -1,6 +1,7 @@
 import expressSession from "express-session";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import { PrismaClient } from "@prisma/client";
+import "dotenv/config";
 
 const sessionStore = new PrismaSessionStore(new PrismaClient(), {
   checkPeriod: 2 * 60 * 1000, //ms

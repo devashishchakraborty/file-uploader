@@ -1,10 +1,12 @@
 import express from "express";
-// import { passport, sessionConfig } from "./config/index.js";
+import passport from "./config/passport.js";
+import sessionConfig from "./config/session.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import multer from "multer";
 import indexRouter from "./routes/indexRouter.js";
 import authRouter from "./routes/authRouter.js";
+
 
 // Get __dirname in ES6
 const __filename = fileURLToPath(import.meta.url);
@@ -20,9 +22,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
-// app.use(sessionConfig);
-// app.use(passport.session());
+app.use(sessionConfig);
+app.use(passport.session());
 
+app.use("/", authRouter);
 app.use("/", indexRouter);
 
 app.listen(3000, () => console.log("app listening on port 3000!"));

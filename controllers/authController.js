@@ -24,7 +24,7 @@ const validateSignUp = [
 
 const userLoginGet = (req, res) => {
   if (req.user) redirect("/");
-  else res.render("login", { user: req.user });
+  else res.render("login");
 };
 const userSignUpGet = (req, res) => res.render("sign-up");
 const userLogoutGet = (req, res, next) => {
@@ -34,13 +34,20 @@ const userLogoutGet = (req, res, next) => {
   });
 };
 
-
-const userLoginPost = (req, res) => {
-  passport.authenticate("local", {
-    successRedirect: "/",
-    failureRedirect: "/login",
-  })
-}
+const userLoginPost = (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) return next(err); // Handle errors
+    if (!user) {
+      return res
+        .status(400)
+        .render("login", { errors: [{ msg: info.message }] });
+    }
+    req.login(user, (err) => {
+      if (err) return next(err);
+      return res.redirect("/");
+    });
+  })(req, res, next);
+};
 
 const userSignUpPost = [
   validateSignUp,
@@ -52,8 +59,13 @@ const userSignUpPost = [
       });
     }
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    const newUser = { ...req.body, password: hashedPassword };
-    await prisma.user.create({ data: newUser });
+    await prisma.user.create({
+      data: {
+        name: req.body.name,
+        email: req.body.email,
+        password: hashedPassword,
+      },
+    });
     res.redirect("/login");
   }),
 ];

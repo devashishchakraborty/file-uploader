@@ -20,7 +20,7 @@ passport.use(
         });
 
         if (!user) {
-          return done(null, false, { message: "Incorrect email" });
+          return done(null, false, { message: "Email Not found!" });
         }
         const match = await bcrypt.compare(password, user.password);
         if (!match) {
