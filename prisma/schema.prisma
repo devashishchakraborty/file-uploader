@@ -17,7 +17,7 @@ model File {
   id          Int      @id @default(autoincrement())
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
-  title       String
+  name        String
   file_path   String   @unique
   uploader    User     @relation(fields: [uploader_id], references: [id])
   uploader_id Int
@@ -26,13 +26,13 @@ model File {
 }
 
 model Folder {
-  id          Int      @id @default(autoincrement())
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  folder_name String
-  files       File[]
-  creator     User     @relation(fields: [creator_id], references: [id])
-  creator_id  Int
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  name       String
+  files      File[]
+  creator    User     @relation(fields: [creator_id], references: [id])
+  creator_id Int
 }
 
 model User {

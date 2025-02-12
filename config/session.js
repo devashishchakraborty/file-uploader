@@ -11,8 +11,8 @@ const sessionStore = new PrismaSessionStore(new PrismaClient(), {
 
 const sessionConfig = expressSession({
   secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
+  resave: true,
+  saveUninitialized: true,
   store: sessionStore,
   cookie: {
     maxAge: 1000 * 60 * 60 * 24, // 1 day

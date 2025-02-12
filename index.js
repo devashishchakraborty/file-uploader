@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import multer from "multer";
 import indexRouter from "./routes/indexRouter.js";
 import authRouter from "./routes/authRouter.js";
+import vaultRouter from "./routes/vaultRouter.js";
 
 
 // Get __dirname in ES6
@@ -25,6 +26,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(sessionConfig);
 app.use(passport.session());
 
+app.use("/vault", vaultRouter)
 app.use("/", authRouter);
 app.use("/", indexRouter);
 
