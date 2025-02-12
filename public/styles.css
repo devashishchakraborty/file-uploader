@@ -40,7 +40,3 @@ main .addItems {
     }
   }
 }
-
-main .addItems ul dialog > article {
-  max-width: 500px;
-}
