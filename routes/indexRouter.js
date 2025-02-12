@@ -2,8 +2,8 @@ import { Router } from "express";
 const indexRouter = Router();
 
 indexRouter.get("/", (req, res) => {
-  res.locals.user = req.user;
-  res.render("index");
+  if (req.user) res.redirect("/vault");
+  else res.render("index");
 });
 
 export default indexRouter;
