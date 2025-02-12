@@ -8,6 +8,8 @@
     <main class="container">
       <% if (locals.user) { %>
        <%- include("home") %>
+       <%- include("partials/newFolderModal.ejs") %>
+       <%- include("partials/fileUploadModal.ejs") %>
       <% } else { %>
         <%- include("lander") %> 
         <% } %> 

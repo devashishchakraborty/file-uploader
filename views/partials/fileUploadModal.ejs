@@ -1,0 +1,29 @@
+<dialog id="fileUploadModal">
+  <article>
+    <header>
+      <h3>Upload New File</h3>
+      <button
+        aria-label="Close"
+        rel="prev"
+        data-target="fileUploadModal"
+        onclick="toggleModal(event)"
+      ></button>
+    </header>
+    <form action="/file-upload" method="post">
+      <input
+        type="file"
+        name="fileUpload"
+        id="fileUplad"
+        required
+      />
+      <button
+        type="submit"
+        autofocus
+        data-target="fileUploadModal"
+        onclick="toggleModal(event)"
+      >
+        Submit
+      </button>
+    </form>
+  </article>
+</dialog>

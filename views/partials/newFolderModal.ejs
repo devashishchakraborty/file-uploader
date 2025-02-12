@@ -1,0 +1,30 @@
+<dialog id="newFolderModal">
+  <article>
+    <header>
+      <h3>Create New Folder</h3>
+      <button
+        aria-label="Close"
+        rel="prev"
+        data-target="newFolderModal"
+        onclick="toggleModal(event)"
+      ></button>
+    </header>
+    <form action="/add-folder" method="post">
+      <input
+        type="text"
+        name="folderName"
+        id="folderName"
+        placeholder="Enter Folder Name!"
+        required
+      />
+      <button
+        type="submit"
+        autofocus
+        data-target="newFolderModal"
+        onclick="toggleModal(event)"
+      >
+        Submit
+      </button>
+    </form>
+  </article>
+</dialog>
