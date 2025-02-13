@@ -18,8 +18,52 @@ const validateFolderName = [
     .escape(),
 ];
 
-const getItems = async (req, res) => {
-  const folders = await prisma.folder.findMany({});
+const vaultHomeGet = async (req, res) => {
+  res.locals.user = req.user;
+  const folders = await prisma.folder.findMany({
+    where: {
+      creator_id: req.user.id,
+      name: {
+        not: {
+          contains: "/",
+        },
+      },
+    },
+  });
+  const files = await prisma.file.findMany({
+    where: {
+      uploader_id: req.user.id,
+      folder_id: null,
+    },
+  });
+  res.render("vault", { files: files, folders: folders });
+};
+
+const vaultFolderGet = async (req, res) => {
+  const { folderId } = req.params;
+  const currentFolder = await prisma.folder.findUnique({
+    where: {
+      id: folderId,
+    },
+  });
+
+  folders = await prisma.folder.findMany({
+    where: {
+      creator_id: req.user.id,
+      name: {
+        startsWith: currentFolder.name + "/",
+      },
+    },
+  });
+  files = await prisma.file.findMany({
+    where: {
+      uploader_id: req.user.id,
+      folder_id: req.params.folderId,
+    },
+  });
+
+  res.locals.currentFolderName = currentFolder.name;
+  res.render("vault", { files: files, folders: folders });
 };
 
 const createFolderPost = [
@@ -39,10 +83,12 @@ const createFolderPost = [
         creator_id: req.user.id,
       },
     });
-    res.redirect(`/vault`);
+    res.redirect('/');
   },
 ];
 
 export default {
+  vaultHomeGet,
+  vaultFolderGet,
   createFolderPost,
 };
