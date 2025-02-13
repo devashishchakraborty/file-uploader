@@ -21,8 +21,8 @@ model File {
   file_path   String   @unique
   uploader    User     @relation(fields: [uploader_id], references: [id])
   uploader_id Int
-  folder      Folder   @relation(fields: [folder_id], references: [id])
-  folder_id   Int
+  folder      Folder?   @relation(fields: [folder_id], references: [id])
+  folder_id   Int?
 }
 
 model Folder {
