@@ -10,33 +10,44 @@
         <nav aria-label="breadcrumb" class="folderNav">
           <ul>
             <li><a href="/">/</a></li>
-            <li><a href="#">folder1</a></li>
-            <li>folder2</li>
+            <% if (locals.currentFolderName)
+            currentFolderName.split("/").forEach((chunk, index) => { %>
+            <li>
+              <a href="/vault"> <%= chunk %> </a>
+            </li>
+            <% }) %>
           </ul>
         </nav>
         <nav class="addItems">
           <ul>
-            <li
-              role="button"
-              data-target="fileUploadModal"
-              onclick="toggleModal(event)"
-            >
-              <%- include("svg/fileUpload.svg") %>
+            <li>
+              <button
+                data-target="fileUploadModal"
+                onclick="toggleModal(event)"
+              >
+                <%- include("svg/fileUpload.svg") %> File Upload
+              </button>
             </li>
-            <li
-              role="button"
-              class="contrast"
-              data-target="newFolderModal"
-              onclick="toggleModal(event)"
-            >
-              <%- include("svg/createNewFolder.svg") %>
+            <li>
+              <button
+                class="contrast"
+                data-target="newFolderModal"
+                onclick="toggleModal(event)"
+              >
+                <%- include("svg/createNewFolder.svg") %> Create Folder
+              </button>
             </li>
           </ul>
         </nav>
       </section>
-      <%- include("partials/errors.ejs") %> 
-      <%- include("partials/newFolderModal.ejs") %>
-      <%- include("partials/fileUploadModal.ejs") %>
+      <section class="items">
+        <% folders.forEach(folder => { %>
+        <a class="folder" href="/vault/<%= folder.id %>"><%= folder.name %></a>
+        <% }) %>
+      </section>
+      <%- include("partials/errors.ejs") %> <%-
+      include("partials/newFolderModal.ejs") %> <%-
+      include("partials/fileUploadModal.ejs") %>
     </main>
   </body>
 </html>

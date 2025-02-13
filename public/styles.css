@@ -30,13 +30,8 @@ main section.utils {
   grid-template-columns: 1fr auto;
 }
 
-main .addItems {
-  ul {
-    gap: 16px;
-    li {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-  }
+main .addItems ul li button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
