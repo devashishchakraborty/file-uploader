@@ -2,8 +2,10 @@ import asyncHandler from "express-async-handler";
 import { body, validationResult } from "express-validator";
 import { PrismaClient } from "@prisma/client";
 import CustomNotFoundError from "../errors/CustomNotFoundError.js";
+import multer from "multer";
 
 const prisma = new PrismaClient();
+const upload = multer({ dest: "../uploads/" });
 
 const validateFolderName = [
   body("folderName")
@@ -16,7 +18,23 @@ const validateFolderName = [
     .withMessage(
       "Folder name can only contain letters, numbers, underscores, hyphens, and dots"
     )
-    .escape(),
+    .escape()
+    // Checking if folderName already exists
+    .custom(async (value, { req }) => {
+      const parentFolderName = req.params.folderName || "";
+      const folder = (
+        await prisma.folder.findMany({
+          where: {
+            creator_id: req.user.id,
+            name:
+              parentFolderName.length !== 0
+                ? parentFolderName + "/" + value
+                : value,
+          },
+        })
+      )[0];
+      if (folder) throw new Error("Folder Name Already Exists");
+    }),
 ];
 
 const vaultHomeGet = async (req, res) => {
@@ -55,19 +73,14 @@ const vaultFolderGet = asyncHandler(async (req, res) => {
     })
   ).at(0);
 
-  if(!currentFolder) {
+  if (!currentFolder) {
     throw new CustomNotFoundError("Folder Not found!");
   }
 
+  const folders = await prisma.$queryRaw`
+  SELECT * FROM "Folder" WHERE creator_id = ${req.user.id} AND name LIKE ${currentFolder.name} || '/%' AND name NOT LIKE ${currentFolder.name} || '/%/%'
+  `;
 
-  const folders = await prisma.folder.findMany({
-    where: {
-      creator_id: req.user.id,
-      name: {
-        startsWith: currentFolder.name + "/",
-      },
-    },
-  });
   const files = await prisma.file.findMany({
     where: {
       uploader_id: req.user.id,
@@ -92,11 +105,14 @@ const createFolderPost = [
       });
     }
 
-    const parentFolderName = req.params.folderName;
+    const parentFolderName = req.params.folderName || "";
     const { folderName } = req.body;
     await prisma.folder.create({
       data: {
-        name: parentFolderName + "/" + folderName,
+        name:
+          parentFolderName.length !== 0
+            ? parentFolderName + "/" + folderName
+            : folderName,
         creator_id: req.user.id,
       },
     });
@@ -104,8 +120,17 @@ const createFolderPost = [
   },
 ];
 
+const uploadFilePost = [
+  upload.single("uploadedFile"),
+  async (req, res) => {
+    console.log(req.file, req.body);
+    res.redirect("/vault");
+  },
+];
+
 export default {
   vaultHomeGet,
   vaultFolderGet,
   createFolderPost,
+  uploadFilePost,
 };

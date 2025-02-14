@@ -9,18 +9,12 @@
         onclick="toggleModal(event)"
       ></button>
     </header>
-    <form action="/file-upload" method="post">
-      <input
-        type="file"
-        name="fileUpload"
-        id="fileUplad"
-        required
-      />
+    <form action="/vault/<%= currentFolderArr.join("/") %>/file-upload" enctype="multipart/form-data" method="post">
+      <input type="file" name="uploadedFile" id="uploadedFile" required />
       <button
         type="submit"
         autofocus
         data-target="fileUploadModal"
-        onclick="toggleModal(event)"
       >
         Submit
       </button>

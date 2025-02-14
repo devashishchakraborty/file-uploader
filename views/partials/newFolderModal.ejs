@@ -9,7 +9,14 @@
         onclick="toggleModal(event)"
       ></button>
     </header>
-    <form action="/vault/<%= currentFolderArr.join("/") %>/new-folder" method="post">
+    <!-- Post request to /new-folder if currentFolderArr is empty -->
+    <form method="post"
+    <% if (currentFolderArr.join("/").length === 0) { %>
+      action="/vault/new-folder"
+    <% } else { %>
+      action="/vault/<%= currentFolderArr.join("/") %>/new-folder"
+    <% } %> 
+    >
       <input
         type="text"
         name="folderName"
