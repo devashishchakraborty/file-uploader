@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import { body, validationResult } from "express-validator";
 import { PrismaClient } from "@prisma/client";
+import CustomNotFoundError from "../errors/CustomNotFoundError.js";
 
 const prisma = new PrismaClient();
 
@@ -36,18 +37,30 @@ const vaultHomeGet = async (req, res) => {
       folder_id: null,
     },
   });
-  res.render("vault", { files: files, folders: folders });
+  res.render("vault", { files: files, folders: folders, currentFolderArr: [] });
 };
 
-const vaultFolderGet = async (req, res) => {
-  const { folderId } = req.params;
-  const currentFolder = await prisma.folder.findUnique({
-    where: {
-      id: folderId,
-    },
-  });
+const vaultFolderGet = asyncHandler(async (req, res) => {
+  if (req.path.endsWith("/") && req.path.length > 1) {
+    return res.redirect(301, req.path.slice(0, -1));
+  }
 
-  folders = await prisma.folder.findMany({
+  const { folderName } = req.params;
+  const currentFolder = (
+    await prisma.folder.findMany({
+      where: {
+        name: folderName,
+        creator_id: req.user.id,
+      },
+    })
+  ).at(0);
+
+  if(!currentFolder) {
+    throw new CustomNotFoundError("Folder Not found!");
+  }
+
+
+  const folders = await prisma.folder.findMany({
     where: {
       creator_id: req.user.id,
       name: {
@@ -55,16 +68,19 @@ const vaultFolderGet = async (req, res) => {
       },
     },
   });
-  files = await prisma.file.findMany({
+  const files = await prisma.file.findMany({
     where: {
       uploader_id: req.user.id,
-      folder_id: req.params.folderId,
+      folder_id: currentFolder.id,
     },
   });
 
-  res.locals.currentFolderName = currentFolder.name;
-  res.render("vault", { files: files, folders: folders });
-};
+  res.render("vault", {
+    files: files,
+    folders: folders,
+    currentFolderArr: currentFolder.name.split("/"),
+  });
+});
 
 const createFolderPost = [
   validateFolderName,
@@ -76,14 +92,15 @@ const createFolderPost = [
       });
     }
 
+    const parentFolderName = req.params.folderName;
     const { folderName } = req.body;
     await prisma.folder.create({
       data: {
-        name: folderName,
+        name: parentFolderName + "/" + folderName,
         creator_id: req.user.id,
       },
     });
-    res.redirect('/');
+    res.redirect(`/vault/${parentFolderName}`);
   },
 ];
 

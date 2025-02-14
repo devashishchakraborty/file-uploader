@@ -9,7 +9,7 @@
         onclick="toggleModal(event)"
       ></button>
     </header>
-    <form action="/vault/new-folder" method="post">
+    <form action="/vault/<%= currentFolderArr.join("/") %>/new-folder" method="post">
       <input
         type="text"
         name="folderName"

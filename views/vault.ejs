@@ -10,10 +10,15 @@
         <nav aria-label="breadcrumb" class="folderNav">
           <ul>
             <li><a href="/">/</a></li>
-            <% if (locals.currentFolderName)
-            currentFolderName.split("/").forEach((chunk, index) => { %>
+            <!-- Iterating over the list of folder names from parent folders to current -->
+            <% if (locals.currentFolderArr)
+            currentFolderArr.forEach((chunk, index) => { %>
             <li>
-              <a href="/vault"> <%= chunk %> </a>
+              <% if (index === currentFolderArr.length - 1) { %>
+                <%= chunk %>
+              <% } else { %>
+                <a href="/vault/<%= currentFolderArr.slice(0, index + 1).join("/") %>"><%= chunk %></a>
+              <% } %>
             </li>
             <% }) %>
           </ul>
@@ -40,9 +45,15 @@
           </ul>
         </nav>
       </section>
-      <section class="items">
+      <section class="itemsContainer">
         <% folders.forEach(folder => { %>
-        <a class="folder" href="/vault/<%= folder.id %>"><%= folder.name %></a>
+        <a
+          class="folder outline secondary"
+          role="button"
+          href="/vault/<%= folder.name %>"
+        >
+          <%- include("svg/folder.svg") %> <%= folder.name.split("/").at(-1) %>
+        </a>
         <% }) %>
       </section>
       <%- include("partials/errors.ejs") %> <%-
