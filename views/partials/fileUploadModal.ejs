@@ -9,7 +9,15 @@
         onclick="toggleModal(event)"
       ></button>
     </header>
-    <form action="/vault/<%= currentFolderArr.join("/") %>/file-upload" enctype="multipart/form-data" method="post">
+    <form 
+    <% if (currentFolderArr.join("/").length === 0) { %>
+      action="/vault/file-upload"
+    <% } else { %>
+      action="/vault/<%= currentFolderArr.join("/") %>/file-upload"
+    <% } %> 
+    enctype="multipart/form-data" 
+    method="post"
+    >
       <input type="file" name="uploadedFile" id="uploadedFile" required />
       <button
         type="submit"

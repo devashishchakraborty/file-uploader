@@ -7,7 +7,6 @@ import indexRouter from "./routes/indexRouter.js";
 import authRouter from "./routes/authRouter.js";
 import vaultRouter from "./routes/vaultRouter.js";
 
-
 // Get __dirname in ES6
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,7 +23,11 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(sessionConfig);
 app.use(passport.session());
 
-app.use("/vault", vaultRouter)
+app.use(
+  "/vault",
+  (req, res, next) => (req.user ? next() : res.redirect("/")),
+  vaultRouter
+);
 app.use("/", authRouter);
 app.use("/", indexRouter);
 

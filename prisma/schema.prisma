@@ -18,13 +18,16 @@ model File {
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
   name        String
-  file_path   String   @unique
+  encoding    String?
+  mimetype    String?
+  path        String   @unique
   uploader    User     @relation(fields: [uploader_id], references: [id])
   uploader_id Int
-  folder      Folder?   @relation(fields: [folder_id], references: [id])
+  folder      Folder?  @relation(fields: [folder_id], references: [id])
   folder_id   Int?
 }
 
+// TODO: APPLY SELF REFERENCING FOR PARENT FOLDER
 model Folder {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())

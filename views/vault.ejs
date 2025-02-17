@@ -23,36 +23,52 @@
             <% }) %>
           </ul>
         </nav>
-        <nav class="addItems">
-          <ul>
-            <li>
-              <button
-                data-target="fileUploadModal"
-                onclick="toggleModal(event)"
-              >
-                <%- include("svg/fileUpload.svg") %> File Upload
-              </button>
-            </li>
-            <li>
-              <button
-                class="contrast"
-                data-target="newFolderModal"
-                onclick="toggleModal(event)"
-              >
-                <%- include("svg/createNewFolder.svg") %> Create Folder
-              </button>
-            </li>
-          </ul>
-        </nav>
+        
+        <button
+          class="fileUpload"
+          data-target="fileUploadModal"
+          onclick="toggleModal(event)"
+        >
+          <%- include("svg/fileUpload.svg") %>
+        </button>
+        <button
+          class="newFolder contrast"
+          data-target="newFolderModal"
+          onclick="toggleModal(event)"
+        >
+          <%- include("svg/createNewFolder.svg") %>
+        </button>
       </section>
       <section class="itemsContainer">
-        <% folders.forEach(folder => { %>
+        <% if(locals.folders) folders.forEach(folder => { %>
+          <div class="folderBox">
+            <a
+              class="folder outline secondary"
+              role="button"
+              href="/vault/<%= folder.name %>"
+            >
+              <%- include("svg/folder.svg") %> <%= folder.name.split("/").at(-1) %>
+
+            </a>
+
+            <details class="dropdown">
+              <summary><%- include("svg/bi--three-dots-vertical.svg")%></summary>
+              <ul>
+                  <li><a href="/"><%- include("svg/mdi--edit.svg")%> Edit</a></li>
+                  <li><a href="/"><%- include("svg/mdi--delete.svg")%> Delete</a></li>
+              </ul>
+            </details>
+
+          </div>
+        <% }) %>
+        <% if(locals.files) files.forEach(file => { %>
         <a
-          class="folder outline secondary"
+          class="file outline"
           role="button"
-          href="/vault/<%= folder.name %>"
+          href="/vault"
         >
-          <%- include("svg/folder.svg") %> <%= folder.name.split("/").at(-1) %>
+          <%- include(`svg/mdi--file-${file.mimetype.split("/").at(0)}.svg`) %> <%= file.name %>     
+
         </a>
         <% }) %>
       </section>

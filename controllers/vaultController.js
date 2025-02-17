@@ -5,7 +5,7 @@ import CustomNotFoundError from "../errors/CustomNotFoundError.js";
 import multer from "multer";
 
 const prisma = new PrismaClient();
-const upload = multer({ dest: "../uploads/" });
+const upload = multer({ dest: "uploads/" });
 
 const validateFolderName = [
   body("folderName")
@@ -48,13 +48,20 @@ const vaultHomeGet = async (req, res) => {
         },
       },
     },
-  });
-  const files = await prisma.file.findMany({
-    where: {
-      uploader_id: req.user.id,
-      folder_id: null,
+    select: {
+      name: true,
     },
   });
+  const files = await prisma.file.findMany({
+      where: {
+        uploader_id: req.user.id,
+        folder_id: null,
+      },
+      select: {
+        name: true,
+        mimetype: true
+      }
+    });
   res.render("vault", { files: files, folders: folders, currentFolderArr: [] });
 };
 
@@ -70,6 +77,9 @@ const vaultFolderGet = asyncHandler(async (req, res) => {
         name: folderName,
         creator_id: req.user.id,
       },
+      select: {
+        id: true,
+      },
     })
   ).at(0);
 
@@ -77,9 +87,17 @@ const vaultFolderGet = asyncHandler(async (req, res) => {
     throw new CustomNotFoundError("Folder Not found!");
   }
 
-  const folders = await prisma.$queryRaw`
-  SELECT * FROM "Folder" WHERE creator_id = ${req.user.id} AND name LIKE ${currentFolder.name} || '/%' AND name NOT LIKE ${currentFolder.name} || '/%/%'
-  `;
+  const folders = await prisma.folder.findMany({
+    where: {
+      creator_id: req.user.id,
+      name: {
+        startsWith: `${folderName}/`, // Equivalent to `LIKE 'currentFolder.name/%'`
+        not: {
+          contains: `${folderName}/` + "%/", // Equivalent to `NOT LIKE 'currentFolder.name/%/%'`
+        },
+      },
+    },
+  });
 
   const files = await prisma.file.findMany({
     where: {
@@ -91,16 +109,17 @@ const vaultFolderGet = asyncHandler(async (req, res) => {
   res.render("vault", {
     files: files,
     folders: folders,
-    currentFolderArr: currentFolder.name.split("/"),
+    currentFolderArr: folderName.split("/"),
   });
 });
 
-const createFolderPost = [
+const createFolder = [
   validateFolderName,
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).render("vault", {
+        currentFolderArr: req.params.folderName.split("/") || [],
         errors: errors.array(),
       });
     }
@@ -123,14 +142,39 @@ const createFolderPost = [
 const uploadFilePost = [
   upload.single("uploadedFile"),
   async (req, res) => {
-    console.log(req.file, req.body);
-    res.redirect("/vault");
+    const folderName = req.params.folderName || "";
+    const folderId = folderName
+      ? (
+          await prisma.folder.findMany({
+            select: {
+              id: true,
+            },
+            where: {
+              name: folderName,
+              creator_id: req.user.id,
+            },
+          })
+        ).at(0).id
+      : null;
+
+    await prisma.file.create({
+      data: {
+        name: req.file.originalname,
+        encoding: req.file.encoding,
+        mimetype: req.file.mimetype,
+        path: req.file.path,
+        uploader_id: req.user.id,
+        folder_id: folderId,
+      },
+    });
+    console.log(req.file);
+    res.redirect(`/vault/${folderName}`);
   },
 ];
 
 export default {
   vaultHomeGet,
   vaultFolderGet,
-  createFolderPost,
+  createFolder,
   uploadFilePost,
 };
