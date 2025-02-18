@@ -94,6 +94,13 @@ main section.utils {
     gap: 8px;
     min-width: 200px;
     text-align: left;
-    padding-right: 2em;
+  }
+
+  .folder{
+    padding-right: 3em;
+  }
+
+  .deleteFolder a{
+    color: crimson;
   }
 }

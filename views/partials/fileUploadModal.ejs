@@ -10,10 +10,10 @@
       ></button>
     </header>
     <form 
-    <% if (currentFolderArr.join("/").length === 0) { %>
-      action="/vault/file-upload"
+    <% if (locals.currentFolder) { %>
+      action="/vault/<%= currentFolder.id %>/file-upload"
     <% } else { %>
-      action="/vault/<%= currentFolderArr.join("/") %>/file-upload"
+      action="/vault/file-upload"
     <% } %> 
     enctype="multipart/form-data" 
     method="post"

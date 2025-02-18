@@ -11,10 +11,11 @@
     </header>
     <!-- Post request to /new-folder if currentFolderArr is empty -->
     <form method="post"
-    <% if (currentFolderArr.join("/").length === 0) { %>
-      action="/vault/new-folder"
+    <% if (locals.currentFolder) { %>
+      action="/vault/<%= currentFolder.id %>/new-folder"
     <% } else { %>
-      action="/vault/<%= currentFolderArr.join("/") %>/new-folder"
+      action="/vault/new-folder"
+      
     <% } %> 
     >
       <input

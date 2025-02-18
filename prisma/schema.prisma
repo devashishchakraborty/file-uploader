@@ -27,7 +27,6 @@ model File {
   folder_id   Int?
 }
 
-// TODO: APPLY SELF REFERENCING FOR PARENT FOLDER
 model Folder {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
@@ -36,6 +35,9 @@ model Folder {
   files      File[]
   creator    User     @relation(fields: [creator_id], references: [id])
   creator_id Int
+  parent_id  Int?
+  parent     Folder?  @relation("FolderHierarchy", fields: [parent_id], references: [id], onDelete: Cascade)
+  children   Folder[] @relation("FolderHierarchy")
 }
 
 model User {

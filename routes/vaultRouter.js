@@ -3,13 +3,14 @@ import vaultController from "../controllers/vaultController.js";
 const vaultRouter = Router();
 
 vaultRouter.get("/", vaultController.vaultHomeGet);
-vaultRouter.get("/:folderName(*)", vaultController.vaultFolderGet);
+vaultRouter.get("/:folderId", vaultController.vaultFolderGet);
+vaultRouter.get("/:folderId/delete", vaultController.vaultFolderDelete);
 
 vaultRouter.post("/new-folder", vaultController.createFolder);
-vaultRouter.post("/:folderName(*)/new-folder", vaultController.createFolder);
+vaultRouter.post("/:folderId/new-folder", vaultController.createFolder);
 
 vaultRouter.post("/file-upload", vaultController.uploadFilePost);
-vaultRouter.post("/:folderName(*)/file-upload", vaultController.uploadFilePost);
+vaultRouter.post("/:folderId/file-upload", vaultController.uploadFilePost);
 
 
 export default vaultRouter;

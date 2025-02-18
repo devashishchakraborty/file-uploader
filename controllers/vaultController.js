@@ -21,95 +21,88 @@ const validateFolderName = [
     .escape()
     // Checking if folderName already exists
     .custom(async (value, { req }) => {
-      const parentFolderName = req.params.folderName || "";
-      const folder = (
-        await prisma.folder.findMany({
-          where: {
-            creator_id: req.user.id,
-            name:
-              parentFolderName.length !== 0
-                ? parentFolderName + "/" + value
-                : value,
-          },
-        })
-      )[0];
+      const parentFolderId = +req.params.folderId || null;
+      const folder = await prisma.folder.findFirst({
+        where: {
+          parent_id: parentFolderId,
+          name: value,
+        },
+      });
       if (folder) throw new Error("Folder Name Already Exists");
     }),
 ];
 
 const vaultHomeGet = async (req, res) => {
-  res.locals.user = req.user;
-  const folders = await prisma.folder.findMany({
-    where: {
-      creator_id: req.user.id,
-      name: {
-        not: {
-          contains: "/",
-        },
-      },
-    },
-    select: {
-      name: true,
-    },
-  });
-  const files = await prisma.file.findMany({
+  const [folders, files] = await Promise.all([
+    prisma.folder.findMany({
       where: {
-        uploader_id: req.user.id,
-        folder_id: null,
-      },
-      select: {
-        name: true,
-        mimetype: true
-      }
-    });
-  res.render("vault", { files: files, folders: folders, currentFolderArr: [] });
-};
-
-const vaultFolderGet = asyncHandler(async (req, res) => {
-  if (req.path.endsWith("/") && req.path.length > 1) {
-    return res.redirect(301, req.path.slice(0, -1));
-  }
-
-  const { folderName } = req.params;
-  const currentFolder = (
-    await prisma.folder.findMany({
-      where: {
-        name: folderName,
         creator_id: req.user.id,
+        parent_id: null, // Fetch only root folders (no parent)
       },
       select: {
         id: true,
+        name: true,
       },
-    })
-  ).at(0);
+    }),
+    prisma.file.findMany({
+      where: {
+        uploader_id: req.user.id,
+        folder_id: null, // Fetch only files not in any folder
+      },
+      select: {
+        id: true,
+        name: true,
+        mimetype: true,
+      },
+    }),
+  ]);
+
+  res.locals.user = req.user;
+  res.render("vault", { files: files, folders: folders });
+};
+
+const vaultFolderGet = asyncHandler(async (req, res) => {
+  const { folderId } = req.params;
+  const currentFolder = await prisma.folder.findUnique({
+    where: {
+      id: +folderId,
+      creator_id: req.user.id,
+    },
+    include: {
+      files: {
+        select: {
+          id: true,
+          name: true,
+          mimetype: true,
+        },
+      },
+      parent: {
+        select: {
+          id: true,
+          name: true,
+          parent_id: true,
+        },
+      },
+      children: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
 
   if (!currentFolder) {
     throw new CustomNotFoundError("Folder Not found!");
   }
 
-  const folders = await prisma.folder.findMany({
-    where: {
-      creator_id: req.user.id,
-      name: {
-        startsWith: `${folderName}/`, // Equivalent to `LIKE 'currentFolder.name/%'`
-        not: {
-          contains: `${folderName}/` + "%/", // Equivalent to `NOT LIKE 'currentFolder.name/%/%'`
-        },
-      },
-    },
-  });
-
-  const files = await prisma.file.findMany({
-    where: {
-      uploader_id: req.user.id,
-      folder_id: currentFolder.id,
-    },
-  });
+  const folders = currentFolder.children;
+  const files = currentFolder.files;
 
   res.render("vault", {
     files: files,
     folders: folders,
-    currentFolderArr: folderName.split("/"),
+    currentFolder: currentFolder,
   });
 });
 
@@ -119,43 +112,26 @@ const createFolder = [
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).render("vault", {
-        currentFolderArr: req.params.folderName.split("/") || [],
         errors: errors.array(),
       });
     }
 
-    const parentFolderName = req.params.folderName || "";
     const { folderName } = req.body;
     await prisma.folder.create({
       data: {
-        name:
-          parentFolderName.length !== 0
-            ? parentFolderName + "/" + folderName
-            : folderName,
+        name: folderName,
+        parent_id: +req.params.folderId || null,
         creator_id: req.user.id,
       },
     });
-    res.redirect(`/vault/${parentFolderName}`);
+    res.redirect(`/vault/${req.params.folderId || ""}`);
   },
 ];
 
 const uploadFilePost = [
   upload.single("uploadedFile"),
   async (req, res) => {
-    const folderName = req.params.folderName || "";
-    const folderId = folderName
-      ? (
-          await prisma.folder.findMany({
-            select: {
-              id: true,
-            },
-            where: {
-              name: folderName,
-              creator_id: req.user.id,
-            },
-          })
-        ).at(0).id
-      : null;
+    const folderId = req.params.folderId || null;
 
     await prisma.file.create({
       data: {
@@ -168,13 +144,33 @@ const uploadFilePost = [
       },
     });
     console.log(req.file);
-    res.redirect(`/vault/${folderName}`);
+    res.redirect(`/vault/${folderId || ""}`);
   },
 ];
+
+const vaultFolderDelete = async (req, res) => {
+  const folderId = +req.params.folderId;
+  const folder = await prisma.folder.findUnique({
+    where: {
+      id: folderId,
+    },
+    select: {
+      parent_id: true,
+    },
+  });
+  const parentId = folder.parent_id || "";
+  await prisma.folder.delete({
+    where: {
+      id: folderId,
+    },
+  });
+  res.redirect(`/vault/${parentId}`);
+};
 
 export default {
   vaultHomeGet,
   vaultFolderGet,
   createFolder,
   uploadFilePost,
+  vaultFolderDelete,
 };
