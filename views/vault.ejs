@@ -13,7 +13,9 @@
             <li><a href="/">/</a></li>
             <% if (locals.currentFolder) { %>
               <% if (currentFolder.parent) { %>
-                <li><a href="/vault/<%= currentFolder.parent.parent_id || '' %>">...&nbsp;</a></li>
+                <% if (currentFolder.parent.parent_id) { %>
+                <li><a href="/vault/<%= currentFolder.parent.parent_id%>">...&nbsp;</a></li>
+                <% } %>
                 <li>
                   <a href="/vault/<%= currentFolder.parent.id %>">
                     <%= currentFolder.parent.name %>
@@ -58,7 +60,7 @@
               <summary><%- include("svg/bi--three-dots-vertical.svg")%></summary>
               <ul>
                   <li class="editFolder">
-                    <a role="button outline" data-target="editFolderModal" onclick="toggleModal(event)"><%- include("svg/mdi--edit.svg")%> Edit</a>
+                    <a href="#" data-target="editFolderModal" onclick="toggleModal(event)"><%- include("svg/mdi--edit.svg")%> Edit</a>
                   </li>
                   <li class="deleteFolder"><a href="vault/<%= folder.id %>/delete"><%- include("svg/mdi--delete.svg")%> Delete</a></li>
               </ul>
