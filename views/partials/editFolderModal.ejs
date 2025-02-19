@@ -1,34 +1,28 @@
-<dialog id="newFolderModal">
+<dialog id="editFolderModal">
   <article>
     <header>
-      <h3>Create New Folder</h3>
+      <h3>Edit Folder</h3>
       <button
         aria-label="Close"
         rel="prev"
-        data-target="newFolderModal"
+        data-target="editFolderModal"
         onclick="toggleModal(event)"
       ></button>
     </header>
     <!-- Post request to /new-folder if currentFolder doesn't exist -->
-    <form method="post"
-    <% if (locals.currentFolder) { %>
-      action="/vault/<%= currentFolder.id %>/new-folder"
-    <% } else { %>
-      action="/vault/new-folder"
-      
-    <% } %> 
-    >
+    <form method="post" action="/vault/<%= folder.id %>/edit-folder">
       <input
         type="text"
         name="folderName"
         id="folderName"
         placeholder="Enter Folder Name!"
+        value=<%= folder.name %> 
         required
       />
       <button
         type="submit"
         autofocus
-        data-target="newFolderModal"
+        data-target="editFolderModal"
       >
         Submit
       </button>

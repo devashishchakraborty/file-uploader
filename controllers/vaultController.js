@@ -128,6 +128,30 @@ const createFolder = [
   },
 ];
 
+const editFolder = [
+  validateFolderName,
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).render("vault", {
+        errors: errors.array(),
+      });
+    }
+
+    const { folderName } = req.body;
+    const updateUser = await prisma.folder.update({
+      where: {
+        id: +req.params.folderId
+      },
+      data: {
+        name: folderName,
+      },
+    });
+    res.redirect(`/vault/${updateUser.parent_id || ""}`);
+  },
+];
+
+
 const uploadFilePost = [
   upload.single("uploadedFile"),
   async (req, res) => {
@@ -171,6 +195,7 @@ export default {
   vaultHomeGet,
   vaultFolderGet,
   createFolder,
+  editFolder,
   uploadFilePost,
   vaultFolderDelete,
 };

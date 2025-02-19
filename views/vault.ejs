@@ -57,11 +57,13 @@
             <details class="dropdown">
               <summary><%- include("svg/bi--three-dots-vertical.svg")%></summary>
               <ul>
-                  <li class="editFolder"><a href="vault/<%= folder.id %>/edit"><%- include("svg/mdi--edit.svg")%> Edit</a></li>
+                  <li class="editFolder">
+                    <a role="button outline" data-target="editFolderModal" onclick="toggleModal(event)"><%- include("svg/mdi--edit.svg")%> Edit</a>
+                  </li>
                   <li class="deleteFolder"><a href="vault/<%= folder.id %>/delete"><%- include("svg/mdi--delete.svg")%> Delete</a></li>
               </ul>
             </details>
-
+            <%- include("partials/editFolderModal.ejs", { folder: folder}) %> 
           </div>
         <% }) %>
         <% if(locals.files) files.forEach(file => { %>

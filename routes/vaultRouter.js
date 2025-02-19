@@ -12,5 +12,6 @@ vaultRouter.post("/:folderId/new-folder", vaultController.createFolder);
 vaultRouter.post("/file-upload", vaultController.uploadFilePost);
 vaultRouter.post("/:folderId/file-upload", vaultController.uploadFilePost);
 
+vaultRouter.post("/:folderId/edit-folder", vaultController.editFolder)
 
 export default vaultRouter;
