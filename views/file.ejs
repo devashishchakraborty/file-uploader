@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include("partials/head") %>
+  </head>
+  <body data-theme="light">
+    <%- include("partials/header") %>
+    <main class="container">
+      <section class="utils grid">
+        <nav aria-label="breadcrumb" class="folderNav">
+          <ul>
+            <li><a href="/">/</a></li>
+            <% if (file.folder) { %> <% if (file.folder.parent_id) { %>
+            <li><a href="/vault/<%= file.folder.parent_id%>">...&nbsp;</a></li>
+            <% } %>
+            <li>
+              <a href="/vault/<%= file.folder.id %>">
+                <%= file.folder.name %>
+              </a>
+            </li>
+            <% } %>
+            <li><%= file.name %></li>
+          </ul>
+        </nav>
+      </section>
+      <section class="fileContainer">
+        <article>
+          <header class="fileName"><b><%= file.name %></b></header>
+          <div class="about">
+            <div class="fileOwner">Added by: <%= file.uploader.name %></div>
+            <div class="fileSize">
+              Size: <%= ( file.size/1024/1024 ).toFixed(2) %> MB
+            </div>
+            <div class="uploadTime">
+              Uploaded on: <%= file.created_at.toLocaleString('default', {
+              month: 'long' }) + " " + file.created_at.getDate() + " " +
+              file.created_at.getFullYear() %>
+            </div>
+            <div class="btns">
+              <a href="/vault/file/<%= file.id %>/download" role="button" class="downloadBtn" >
+                <%- include("svg/mdi--download.svg") %> Download
+              </a>
+              <form action="/vault/file/<%= file.id %>/delete" method="post">
+                <button title="Delete File" class="deleteBtn" onclick="this.closest('form').submit(); return false;">
+                  <%- include("svg/mdi--delete.svg")%>
+                </button>
+              </form>
+  
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

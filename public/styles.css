@@ -1,4 +1,4 @@
-a:hover{
+a:hover {
   cursor: pointer;
 }
 
@@ -39,6 +39,7 @@ main section.utils {
     display: flex;
     align-items: center;
     gap: 4px;
+    /* padding: 0.5em 0.75em; */
   }
 }
 
@@ -65,8 +66,8 @@ main section.utils {
         align-items: center;
         background-color: inherit;
       }
-      summary:hover{
-        background-color: var(--pico-form-element-background-color)
+      summary:hover {
+        background-color: var(--pico-form-element-background-color);
       }
     }
 
@@ -100,11 +101,39 @@ main section.utils {
     text-align: left;
   }
 
-  .folder{
+  .folder {
     padding-right: 3em;
   }
 
-  .deleteFolder a{
+  .deleteFolder a {
     color: crimson;
+  }
+}
+
+.fileContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  article .about {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .btns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    .downloadBtn{
+      flex: 1;
+    }
+    .deleteBtn {
+      border: none;
+      background-color: crimson;
+      svg {
+        height: 1.5em;
+        width: 1.5em;
+      }
+    }
   }
 }

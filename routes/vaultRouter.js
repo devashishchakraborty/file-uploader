@@ -4,7 +4,7 @@ const vaultRouter = Router();
 
 vaultRouter.get("/", vaultController.vaultHomeGet);
 vaultRouter.get("/:folderId", vaultController.vaultFolderGet);
-vaultRouter.get("/:folderId/delete", vaultController.vaultFolderDelete);
+vaultRouter.get("/file/:fileId", vaultController.vaultFileGet);
 
 vaultRouter.post("/new-folder", vaultController.createFolder);
 vaultRouter.post("/:folderId/new-folder", vaultController.createFolder);
@@ -12,6 +12,7 @@ vaultRouter.post("/:folderId/new-folder", vaultController.createFolder);
 vaultRouter.post("/file-upload", vaultController.uploadFilePost);
 vaultRouter.post("/:folderId/file-upload", vaultController.uploadFilePost);
 
-vaultRouter.post("/:folderId/edit-folder", vaultController.editFolder)
+vaultRouter.post("/:folderId/edit-folder", vaultController.editFolder);
+vaultRouter.post("/:folderId/delete", vaultController.deleteFolder);
 
 export default vaultRouter;

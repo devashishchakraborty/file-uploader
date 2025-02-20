@@ -1,3 +1,4 @@
+import path from "path";
 import asyncHandler from "express-async-handler";
 import { body, validationResult } from "express-validator";
 import { PrismaClient } from "@prisma/client";
@@ -5,7 +6,21 @@ import CustomNotFoundError from "../errors/CustomNotFoundError.js";
 import multer from "multer";
 
 const prisma = new PrismaClient();
-const upload = multer({ dest: "uploads/" });
+const decodeFilename = filename => Buffer.from(filename, 'latin1').toString('utf8');
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, './public/uploads/'); // Ensure 'uploads' directory exists
+  },
+  filename: (req, file, cb) => {
+    const filename = decodeFilename(file.originalname)
+    const ext = path.extname(filename);
+    const baseName = path.basename(filename, ext);
+
+    cb(null, `${baseName}-${Date.now()}${ext}`);
+  }
+});
+
+const upload = multer({ storage: storage });
 
 const validateFolderName = [
   body("folderName")
@@ -57,8 +72,7 @@ const vaultHomeGet = async (req, res) => {
     }),
   ]);
 
-  res.locals.user = req.user;
-  res.render("vault", { files: files, folders: folders });
+  res.render("vault", { user: req.user, files: files, folders: folders });
 };
 
 const vaultFolderGet = asyncHandler(async (req, res) => {
@@ -100,6 +114,7 @@ const vaultFolderGet = asyncHandler(async (req, res) => {
   const files = currentFolder.files;
 
   res.render("vault", {
+    user: req.user,
     files: files,
     folders: folders,
     currentFolder: currentFolder,
@@ -141,7 +156,7 @@ const editFolder = [
     const { folderName } = req.body;
     const updateUser = await prisma.folder.update({
       where: {
-        id: +req.params.folderId
+        id: +req.params.folderId,
       },
       data: {
         name: folderName,
@@ -151,19 +166,18 @@ const editFolder = [
   },
 ];
 
-
 const uploadFilePost = [
   upload.single("uploadedFile"),
   async (req, res) => {
-    const folderId = req.params.folderId || null;
+    const folderId = +req.params.folderId || null;
 
     await prisma.file.create({
       data: {
-        name: req.file.originalname,
-        encoding: req.file.encoding,
+        name: decodeFilename(req.file.originalname),
         mimetype: req.file.mimetype,
         path: req.file.path,
         uploader_id: req.user.id,
+        size: req.file.size,
         folder_id: folderId,
       },
     });
@@ -172,7 +186,7 @@ const uploadFilePost = [
   },
 ];
 
-const vaultFolderDelete = async (req, res) => {
+const deleteFolder = async (req, res) => {
   const folderId = +req.params.folderId;
   const folder = await prisma.folder.findUnique({
     where: {
@@ -191,11 +205,25 @@ const vaultFolderDelete = async (req, res) => {
   res.redirect(`/vault/${parentId}`);
 };
 
+const vaultFileGet = async (req, res) => {
+  const { fileId } = req.params;
+  const file = await prisma.file.findUnique({
+    where: {
+      id: +fileId
+    },
+    include: {
+      uploader: true,
+    }
+  })
+  res.render("file", { file: file });
+};
+
 export default {
   vaultHomeGet,
   vaultFolderGet,
   createFolder,
   editFolder,
+  deleteFolder,
+  vaultFileGet,
   uploadFilePost,
-  vaultFolderDelete,
 };

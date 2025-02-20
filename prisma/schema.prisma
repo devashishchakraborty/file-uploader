@@ -18,9 +18,9 @@ model File {
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
   name        String
-  encoding    String?
   mimetype    String?
   path        String   @unique
+  size        Int?
   uploader    User     @relation(fields: [uploader_id], references: [id])
   uploader_id Int
   folder      Folder?  @relation(fields: [folder_id], references: [id])

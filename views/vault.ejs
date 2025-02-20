@@ -51,18 +51,27 @@
               class="folder outline secondary"
               role="button"
               href="/vault/<%= folder.id %>"
+              title="<%= folder.name %>"
             >
-              <%- include("svg/folder.svg") %> <%= folder.name %>
-
+              <%- include("svg/folder.svg") %> 
+              <%= folder.name.length > 20 ? `${folder.name.slice(0, 17)}...` : folder.name %>
             </a>
 
             <details class="dropdown">
               <summary><%- include("svg/bi--three-dots-vertical.svg")%></summary>
               <ul>
                   <li class="editFolder">
-                    <a href="#" data-target="editFolderModal" onclick="toggleModal(event)"><%- include("svg/mdi--edit.svg")%> Edit</a>
+                    <a href="#" data-target="editFolderModal" onclick="toggleModal(event)">
+                      <%- include("svg/mdi--edit.svg")%> Edit
+                    </a>
                   </li>
-                  <li class="deleteFolder"><a href="vault/<%= folder.id %>/delete"><%- include("svg/mdi--delete.svg")%> Delete</a></li>
+                  <li class="deleteFolder">
+                    <form action="vault/<%= folder.id %>/delete" method="post">
+                      <a href="#" onclick="this.closest('form').submit(); return false;">
+                        <%- include("svg/mdi--delete.svg")%> Delete
+                      </a>
+                    </form>
+                  </li>
               </ul>
             </details>
             <%- include("partials/editFolderModal.ejs", { folder: folder}) %> 
@@ -72,10 +81,11 @@
         <a
           class="file outline"
           role="button"
-          href="/vault"
+          href="/vault/file/<%= file.id %>"
+          title="<%= file.name %>"
         >
-          <%- include(`svg/mdi--file-${file.mimetype.split("/")[0]}.svg`) %> <%= file.name %>     
-
+          <%- include(`svg/mdi--file-${file.mimetype.split("/")[0]}.svg`) %> 
+          <%= file.name.length > 20 ? `${file.name.slice(0, 17)}...` : file.name %>
         </a>
         <% }) %>
       </section>
