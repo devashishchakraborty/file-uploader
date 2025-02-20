@@ -37,7 +37,7 @@
               file.created_at.getFullYear() %>
             </div>
             <div class="btns">
-              <a href="/vault/file/<%= file.id %>/download" role="button" class="downloadBtn" >
+              <a href="/vault/file/<%= file.id %>/download" role="button" class="downloadBtn" download>
                 <%- include("svg/mdi--download.svg") %> Download
               </a>
               <form action="/vault/file/<%= file.id %>/delete" method="post">

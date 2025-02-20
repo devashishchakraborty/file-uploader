@@ -18,12 +18,12 @@
                 <% } %>
                 <li>
                   <a href="/vault/<%= currentFolder.parent.id %>">
-                    <%= currentFolder.parent.name %>
+                    <%= currentFolder.parent.name.length > 20 ? `${currentFolder.parent.name.slice(0, 17)}...` : currentFolder.parent.name %>
                   </a>
                 </li>
               <% } %>
             <li>
-              <%= currentFolder.name %>
+              <%= currentFolder.name.length > 20 ? `${currentFolder.name.slice(0, 17)}...` : currentFolder.name %>
             </li>
             <% } %>
           </ul>

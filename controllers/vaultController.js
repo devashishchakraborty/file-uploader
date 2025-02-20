@@ -6,18 +6,22 @@ import CustomNotFoundError from "../errors/CustomNotFoundError.js";
 import multer from "multer";
 
 const prisma = new PrismaClient();
-const decodeFilename = filename => Buffer.from(filename, 'latin1').toString('utf8');
+
+const decodeFilename = (filename) => {
+  return Buffer.from(filename, "latin1").toString("utf8");
+};
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, './public/uploads/'); // Ensure 'uploads' directory exists
+    cb(null, "./public/uploads/"); // Ensure 'uploads' directory exists
   },
   filename: (req, file, cb) => {
-    const filename = decodeFilename(file.originalname)
+    const filename = decodeFilename(file.originalname);
     const ext = path.extname(filename);
     const baseName = path.basename(filename, ext);
 
     cb(null, `${baseName}-${Date.now()}${ext}`);
-  }
+  },
 });
 
 const upload = multer({ storage: storage });
@@ -181,41 +185,55 @@ const uploadFilePost = [
         folder_id: folderId,
       },
     });
-    console.log(req.file);
     res.redirect(`/vault/${folderId || ""}`);
   },
 ];
 
 const deleteFolder = async (req, res) => {
-  const folderId = +req.params.folderId;
-  const folder = await prisma.folder.findUnique({
+  const { folderId } = req.params;
+  const folder = await prisma.folder.delete({
     where: {
-      id: folderId,
-    },
-    select: {
-      parent_id: true,
+      id: +folderId,
     },
   });
-  const parentId = folder.parent_id || "";
-  await prisma.folder.delete({
-    where: {
-      id: folderId,
-    },
-  });
-  res.redirect(`/vault/${parentId}`);
+  res.redirect(`/vault/${folder.parent_id || ""}`);
 };
 
 const vaultFileGet = async (req, res) => {
   const { fileId } = req.params;
   const file = await prisma.file.findUnique({
     where: {
-      id: +fileId
+      id: +fileId,
     },
     include: {
       uploader: true,
-    }
-  })
+    },
+  });
   res.render("file", { file: file });
+};
+
+const vaultFileDownload = async (req, res) => {
+  const file = await prisma.file.findUnique({
+    where: {
+      id: +req.params.fileId,
+    },
+  });
+  res.download(file.path, file.name, (err) => {
+    if (err) {
+      console.error("Error downloading file:", err);
+      res.status(500).send("Could not download the file.");
+    }
+  });
+};
+
+const deleteFile = async (req, res) => {
+  const { fileId } = req.params;
+  const file = await prisma.file.delete({
+    where: {
+      id: +fileId,
+    },
+  });
+  res.redirect(`/vault/${file.folder_id || ""}`);
 };
 
 export default {
@@ -226,4 +244,6 @@ export default {
   deleteFolder,
   vaultFileGet,
   uploadFilePost,
+  vaultFileDownload,
+  deleteFile,
 };
