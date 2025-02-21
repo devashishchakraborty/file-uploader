@@ -1,30 +1,16 @@
-import path from "path";
 import asyncHandler from "express-async-handler";
 import { body, validationResult } from "express-validator";
 import { PrismaClient } from "@prisma/client";
 import CustomNotFoundError from "../errors/CustomNotFoundError.js";
-import multer from "multer";
+import { upload } from "../middlewares/multer.middleware.js";
+import { decodeFilename } from "../utils/decodeFilename.js";
+import fs from "fs";
+import {
+  uploadOnCloudinary,
+  downloadFromCloudinary,
+} from "../utils/cloudinary.js";
 
 const prisma = new PrismaClient();
-
-const decodeFilename = (filename) => {
-  return Buffer.from(filename, "latin1").toString("utf8");
-};
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "./public/uploads/"); // Ensure 'uploads' directory exists
-  },
-  filename: (req, file, cb) => {
-    const filename = decodeFilename(file.originalname);
-    const ext = path.extname(filename);
-    const baseName = path.basename(filename, ext);
-
-    cb(null, `${baseName}-${Date.now()}${ext}`);
-  },
-});
-
-const upload = multer({ storage: storage });
 
 const validateFolderName = [
   body("folderName")
@@ -131,6 +117,7 @@ const createFolder = [
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).render("vault", {
+        user: req.user,
         errors: errors.array(),
       });
     }
@@ -170,25 +157,6 @@ const editFolder = [
   },
 ];
 
-const uploadFilePost = [
-  upload.single("uploadedFile"),
-  async (req, res) => {
-    const folderId = +req.params.folderId || null;
-
-    await prisma.file.create({
-      data: {
-        name: decodeFilename(req.file.originalname),
-        mimetype: req.file.mimetype,
-        path: req.file.path,
-        uploader_id: req.user.id,
-        size: req.file.size,
-        folder_id: folderId,
-      },
-    });
-    res.redirect(`/vault/${folderId || ""}`);
-  },
-];
-
 const deleteFolder = async (req, res) => {
   const { folderId } = req.params;
   const folder = await prisma.folder.delete({
@@ -198,6 +166,25 @@ const deleteFolder = async (req, res) => {
   });
   res.redirect(`/vault/${folder.parent_id || ""}`);
 };
+
+const uploadFile = [
+  upload.single("uploadedFile"),
+  async (req, res) => {
+    const folderId = +req.params.folderId || null;
+    const uploadedFile = await uploadOnCloudinary(req.file.path);
+    await prisma.file.create({
+      data: {
+        name: decodeFilename(req.file.originalname),
+        mimetype: req.file.mimetype,
+        url: uploadedFile.url,
+        uploader_id: req.user.id,
+        size: req.file.size,
+        folder_id: folderId,
+      },
+    });
+    res.redirect(`/vault/${folderId || ""}`);
+  },
+];
 
 const vaultFileGet = async (req, res) => {
   const { fileId } = req.params;
@@ -209,20 +196,33 @@ const vaultFileGet = async (req, res) => {
       uploader: true,
     },
   });
-  res.render("file", { file: file });
+  res.render("file", { user: req.user, file: file });
 };
 
-const vaultFileDownload = async (req, res) => {
+const downloadFile = async (req, res) => {
   const file = await prisma.file.findUnique({
     where: {
       id: +req.params.fileId,
     },
   });
-  res.download(file.path, file.name, (err) => {
-    if (err) {
-      console.error("Error downloading file:", err);
-      res.status(500).send("Could not download the file.");
-    }
+
+  const outputFilePath = "./public/downloads/" + Date.now() + file.name;
+  const fileStream = await downloadFromCloudinary(file.url, outputFilePath);
+  // Handle the finish event
+  fileStream.on("finish", () => {
+    res.download(outputFilePath, file.name, (err) => {
+      if (err) {
+        console.error("Error downloading file:", err);
+        res.status(500).send("Could not download the file.");
+      }
+
+      // Delete the file after it has been downloaded
+      fs.unlink(outputFilePath, (unlinkErr) => {
+        if (unlinkErr) {
+          console.error("Error deleting file:", unlinkErr);
+        }
+      });
+    });
   });
 };
 
@@ -243,7 +243,7 @@ export default {
   editFolder,
   deleteFolder,
   vaultFileGet,
-  uploadFilePost,
-  vaultFileDownload,
+  uploadFile,
+  downloadFile,
   deleteFile,
 };

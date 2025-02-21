@@ -10,9 +10,9 @@ vaultRouter.post("/:folderId/edit-folder", vaultController.editFolder);
 vaultRouter.post("/:folderId/delete", vaultController.deleteFolder);
 
 vaultRouter.get("/file/:fileId", vaultController.vaultFileGet);
-vaultRouter.get('/file/:fileId/download', vaultController.vaultFileDownload)
-vaultRouter.post("/file-upload", vaultController.uploadFilePost);
-vaultRouter.post("/:folderId/file-upload", vaultController.uploadFilePost);
+vaultRouter.get('/file/:fileId/download', vaultController.downloadFile)
+vaultRouter.post("/file-upload", vaultController.uploadFile);
+vaultRouter.post("/:folderId/file-upload", vaultController.uploadFile);
 vaultRouter.post("/file/:fileId/delete", vaultController.deleteFile);
 
 

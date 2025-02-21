@@ -19,7 +19,7 @@ model File {
   updated_at  DateTime @updatedAt
   name        String
   mimetype    String?
-  path        String   @unique
+  url         String   @unique
   size        Int?
   uploader    User     @relation(fields: [uploader_id], references: [id])
   uploader_id Int
