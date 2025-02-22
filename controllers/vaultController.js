@@ -8,6 +8,7 @@ import fs from "fs";
 import {
   uploadOnCloudinary,
   downloadFromCloudinary,
+  deleteFromCloudinary
 } from "../utils/cloudinary.js";
 
 const prisma = new PrismaClient();
@@ -176,7 +177,7 @@ const uploadFile = [
       data: {
         name: decodeFilename(req.file.originalname),
         mimetype: req.file.mimetype,
-        url: uploadedFile.url,
+        url: uploadedFile.secure_url,
         uploader_id: req.user.id,
         size: req.file.size,
         folder_id: folderId,
@@ -233,6 +234,7 @@ const deleteFile = async (req, res) => {
       id: +fileId,
     },
   });
+  await deleteFromCloudinary(file.url)
   res.redirect(`/vault/${file.folder_id || ""}`);
 };
 

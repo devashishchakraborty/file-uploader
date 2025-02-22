@@ -15,6 +15,7 @@ const uploadOnCloudinary = async (localFilePath) => {
   try {
     uploadResult = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
+      folder: "filevault-uploads",
     });
   } catch (error) {
     console.error("Cloudinary Upload Error:", error);
@@ -54,4 +55,10 @@ const downloadFromCloudinary = async (url, outputPath) => {
   }
 };
 
-export { uploadOnCloudinary, downloadFromCloudinary };
+const deleteFromCloudinary = async (url) => {
+  const publicId =
+    "filevault-uploads/" + url.split("/filevault-uploads/")[1].split(".")[0];
+  await cloudinary.uploader.destroy(publicId, { invalidate: true });
+};
+
+export { uploadOnCloudinary, downloadFromCloudinary, deleteFromCloudinary };
