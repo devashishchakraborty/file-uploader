@@ -19,13 +19,13 @@ app.use(express.static(path.join(import.meta.dirname, "public")));
 app.use(sessionConfig);
 app.use(passport.session());
 
+app.use("/", authRouter);
+app.use("/", indexRouter);
 app.use(
   "/vault",
   (req, res, next) => (req.user ? next() : res.redirect("/")),
   vaultRouter
 );
-app.use("/", authRouter);
-app.use("/", indexRouter);
 
 // Every thrown error in the application or the previous middleware function calling `next` with an error as an argument will eventually go to this middleware function
 app.use((err, req, res, next) => {
