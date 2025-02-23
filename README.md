@@ -6,7 +6,6 @@
 
 ## Features
 - **Folder Creation**: Users can create, update, and delete folders to the server.
-
 - **File Upload**: Users can upload files (e.g., images, documents) to the server.
 - **File List**: Displays a list of uploaded files with details such as file name, size, and upload date.
 - **File Deletion**: Users can delete uploaded files from the server.

@@ -1,12 +1,15 @@
 <base href="/" />
 <meta charset="UTF-8" />
-<meta name="color-scheme" content="light dark">
+<meta name="viewport" content="width=device-width" />
+<meta name="color-scheme" content="light dark" />
 <title>FileVault</title>
 <!-- <link rel="stylesheet" href="styles.css"> -->
 <link rel="shortcut icon" href="fileVaultLogo.svg" type="image/x-icon" />
 <link
   rel="stylesheet"
   href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.jade.min.css"
->
-<link rel="stylesheet" href="./styles.css">
-<script src="modal.js" defer></script>
+/>
+<link rel="stylesheet" href="./styles.css" />
+<% if (locals.user) { %>
+  <script src="modal.js" defer></script>
+<% } %>
