@@ -52,7 +52,7 @@ Create a .env file in the root directory and add the following:
 4. **Start the server**:
 
     ```bash
-    npm start
+    node --watch .
     ```
 
 5. **Access the application**:
